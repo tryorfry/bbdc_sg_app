@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 from dataclasses import dataclass
 
 from selenium import webdriver
@@ -59,9 +60,23 @@ class Bbdc():
         self.member_info = MemberInfo()
 
     def __add_member_info(self):
+        """The website page is built with iFrames. And very bad in terms of html, css coding standards. 
+           Terrible code and even the sql query is stored in html page as the attributes.
+           Anyway. Here are the iFrames and page layout:
+            <frameset rows="89,*" frameborder="NO" border="0" framespacing="0"> 
+            <frame name="topFrame" scrolling="NO" noresize="" src="inc-webpage/b-topnav.asp" cd_frame_id_="2fa8466da3caf01345d20749fa79bd94">
+            <frameset rows="*,20" frameborder="NO" border="0" framespacing="0"> 
+            <frameset cols="175,*" frameborder="NO" border="0" framespacing="0"> 
+            <frame name="leftFrame" scrolling="AUTO" noresize="" src="inc-webpage/b-sidenav-3.asp">
+            <frame name="mainFrame" src="b-default.asp">
+            </frameset>
+            <frame name="bottomFrame" scrolling="NO" noresize="" src="inc-webpage/b-footer.asp">  
+            </frameset>
+            </frameset>
+        """
         self.helper.wait_until_timeout_by_name('topFrame') # blue info bar at top with image bbdc logo is an iframe
-        topFrame = self.driver.find_element(by='name', value='topFrame')
-        self.driver.switch_to.frame(topFrame)
+        top_frame = self.driver.find_element(By.NAME, 'topFrame')
+        self.driver.switch_to.frame(top_frame)
         
         soup = bs4.BeautifulSoup(self.driver.page_source, features='html.parser')
         info_table = soup.select_one('table.toptxtbold')
@@ -89,39 +104,72 @@ class Bbdc():
                         continue                
 
                     if td.string == 'Account Balance:':
-                        self.member_info.account_balance = tds[i+1].string
+                        dollar = tds[i+1].string
+                        self.member_info.account_balance = float(dollar.replace('$', ''))
                         continue
 
                     if td.string == 'Membership Expiry Date:':
-                        self.member_info.membership_expiry_date = tds[i+1].string
-                        continue  
+                        self.member_info.membership_expiry_date = datetime.strptime(tds[i+1].string, '%d %B %Y')
+                        continue
 
+        self.driver.switch_to.default_content()
+
+    def __refresh_main_page(self):
+        self.driver.get('http://www.bbdc.sg/bbdc/b-mainframe.asp')
 
     def login(self):
         self.driver.get('https://info.bbdc.sg/members-login/')
         
-        element = self.driver.find_element(by='name', value='txtNRIC')
+        element = self.driver.find_element(By.NAME, 'txtNRIC')
         element.send_keys(self.username)
-        element = self.driver.find_element(by='name', value='txtpassword')
+        element = self.driver.find_element(By.NAME, 'txtpassword')
         element.send_keys(self.password)
 
-        login_btn = self.driver.find_element(by='name', value='btnLogin')
+        login_btn = self.driver.find_element(By.NAME, 'btnLogin')
         login_btn.click()
         
         self.helper.wait_until_timeout_by_id('proceed-button')
         
-        proceed_btn = self.driver.find_element(by='id', value='proceed-button')
+        proceed_btn = self.driver.find_element(By.ID, 'proceed-button')
         proceed_btn.click()
 
         self.helper.wait_until_timeout_by_name('topFrame')
 
         self.__add_member_info()
-    
-    
+
+
+    def tp_simulater_booking(self):
+        print(self.driver.page_source)
+        self.helper.wait_until_timeout_by_name('leftFrame')
+        left_frame = self.driver.find_element(By.NAME, 'leftFrame')
+        self.driver.switch_to.frame(left_frame)
+
+#        print(self.driver.page_source)
+        booking_link = self.driver.find_element(By.XPATH, '//a[@href="../b-selectTPDSModule.asp"]')
+        booking_link.click()
+
+        # now you have clicked the link in left nav. Switch to main page
+        self.driver.switch_to.default_content()
+        main_frame = self.driver.find_element(By.NAME, 'mainFrame')
+        self.driver.switch_to.frame(main_frame)
+
+        self.helper.wait_until_timeout_by_name('optTest')
+        tp_module1 = self.driver.find_element(By.NAME, 'optTest')
+        tp_module1.click()
+
+        print('Selecting "TP Driving Simulator Module 1" and submitting')
+        self.driver.find_element(By.NAME, 'btnSubmit').click()
+        
+        # the page loads in main_frame and we are still at it. Lets continue
+        print(self.driver.page_source)
+
+
 
 if __name__ == '__main__':
-    bbdc = Bbdc(username='781W22101984', password='204107')
+    bbdc = Bbdc(username='279G23061987', password='895800')
+#    bbdc = Bbdc(username='781W22101984', password='204107')
     bbdc.login()
     print(bbdc.member_info)
+    bbdc.tp_simulater_booking()
 
     
