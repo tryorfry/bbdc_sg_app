@@ -1,0 +1,5 @@
+bs4_test.py
+test.html
+*.log
+.env
+venv/
