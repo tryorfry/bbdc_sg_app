@@ -138,8 +138,9 @@ class Bbdc():
 
         self.__add_member_info()
 
-
     def tp_simulater_booking(self):
+        """Traffic Police Driving Simulater booking. This is one of the most difficult sessions to get.
+        """
         print(self.driver.page_source)
         self.helper.wait_until_timeout_by_name('leftFrame')
         left_frame = self.driver.find_element(By.NAME, 'leftFrame')
@@ -162,8 +163,56 @@ class Bbdc():
         self.driver.find_element(By.NAME, 'btnSubmit').click()
         
         # the page loads in main_frame and we are still at it. Lets continue
-        print(self.driver.page_source)
+        # print(self.driver.page_source)
 
+        # keep on checking until some sessions are available for booking
+        # select month, all session and all days and serach
+        
+        NUM_OF_MONTH_TO_SEARCH = 6
+        for i in range(NUM_OF_MONTH_TO_SEARCH):
+            self.__all_month_all_session_all_day(i)
+            buttons = self.driver.find_elements(By.XPATH, '//input[@type="button"]')
+            
+            # if button count is only one then no slots avaliable (only back button)
+            if len(buttons) > 1:
+                break
+            else:
+                back_button = self.driver.find_element(By.NAME, 'btnBack')
+                back_button.click()
+                self.helper.wait_until_timeout_by_name('btnSearch')
+
+    def __all_month_all_session_all_day(self, month_index):
+        # select first month, all session and all days and serach first
+        months = self.driver.find_elements(By.NAME, 'Month')
+
+        if not months[month_index].is_selected():
+            months[month_index].click()
+        
+        # uncheck already searched months which doesn't have slot for booking and select only current month_index month
+        for i in reversed(range(month_index)):
+            if months[i].is_selected():
+                months[i].click()
+
+        # just delay 1 sec so that user can see what has been done. Not required otherwise.
+        time.sleep(1)
+
+        session = self.driver.find_element(By.NAME, 'allSes')
+        if not session.is_selected():
+            session.click()
+
+        time.sleep(1)        
+
+        all_days = self.driver.find_element(By.NAME, 'allDay')
+        if not all_days.is_selected():
+            all_days.click()
+
+        time.sleep(1)
+
+        search = self.driver.find_element(By.NAME, 'btnSearch')
+        search.click()
+
+        time.sleep(1)
+        self.helper.wait_until_timeout_by_name('btnBack') # just make sure that the page is loaded. At least back button is there.
 
 
 if __name__ == '__main__':
