@@ -11,6 +11,8 @@ from selenium.webdriver.common.by import By
 
 import bs4
 
+from notifications import Gmail
+
 TIMEOUT = 30 # wait for page to load at max TIMEOUT seconds
 
 class Helper():
@@ -175,6 +177,20 @@ class Bbdc():
             
             # if button count is only one then no slots avaliable (only back button)
             if len(buttons) > 1:
+                self.driver.get_screenshot_as_file('tp_booking_slot_available.png')
+                gmail = Gmail()
+                gmail.send(
+                    ['sachindangol@gmail.com', 'arthi.sniop@gmail.com'],
+                    subject='BBDC TP Simulater Slot availability notification',
+                    body="""
+                        Hi,
+                            Please find the attachment to see the currently available slots for BBDC TP Simulater.
+
+                        Thanks.
+                    """,
+                    attachments=['./tp_booking_slot_available.png']
+                )
+                print("Gmail notification sent.")
                 break
             else:
                 back_button = self.driver.find_element(By.NAME, 'btnBack')
