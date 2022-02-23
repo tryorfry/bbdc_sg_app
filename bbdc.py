@@ -186,7 +186,7 @@ class Bbdc():
                 self.driver.get_screenshot_as_file('tp_booking_slot_available.png')
                 gmail = Gmail()
                 gmail.send(
-                    [id.strip() for id in os.environ('notification_email_recipient_csv').split(',')]
+                    [id.strip() for id in os.environ('notification_email_recipient_csv').split(',')],
                     subject='BBDC TP Simulater Slot availability notification',
                     body="""
                         Hi,
