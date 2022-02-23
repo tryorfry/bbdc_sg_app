@@ -1,3 +1,4 @@
+import os
 import time
 from getpass import getpass
 from datetime import datetime
@@ -56,8 +57,13 @@ class Bbdc():
     def __init__(self, username=None, password=None):
         self.username = username
         self.password = password
-        self.driver = webdriver.Chrome()
-        self.driver.maximize_window() # make the window full screen
+
+        # Following ChromeOptions requried run chrome in headless mode in heroku and to not throw shm memory limit error
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        self.driver = webdriver.Chrome(options=chrome_options)
+        self.driver.maximize_window()
 
         self.helper = Helper(self.driver)
         self.member_info = MemberInfo()
@@ -180,7 +186,7 @@ class Bbdc():
                 self.driver.get_screenshot_as_file('tp_booking_slot_available.png')
                 gmail = Gmail()
                 gmail.send(
-                    ['sachindangol@gmail.com', 'arthi.sniop@gmail.com'],
+                    [id.strip() for id in os.environ('notification_email_recipient_csv').split(',')]
                     subject='BBDC TP Simulater Slot availability notification',
                     body="""
                         Hi,
