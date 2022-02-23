@@ -1,5 +1,17 @@
-bs4_test.py
-test.html
-*.log
+__pycache__/
+.pytest_cache/
+__pypackages__/
+
+# Environments
 .env
+.venv
+env/
 venv/
+ENV/
+env.bak/
+venv.bak/
+
+# log files
+*.log
+
+

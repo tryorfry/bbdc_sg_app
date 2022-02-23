@@ -24,6 +24,9 @@ urllib3 = "==1.26.8"
 wsproto = "==1.0.0"
 async_generator = "==1.10"
 pyOpenSSL = "==21.0.0"
+fastapi = "*"
+gunicorn = "*"
+uvicorn = "*"
 
 [dev-packages]
 

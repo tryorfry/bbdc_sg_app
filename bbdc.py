@@ -232,12 +232,11 @@ class Bbdc():
 
 
 if __name__ == '__main__':
-    username = '279G23061987'
-    print(f'username is {username}')
+    print(f'key in username: ')
+    username = getpass()
     print(f'key in password: ')
     password = getpass()
     bbdc = Bbdc(username=username, password=password)
-#    bbdc = Bbdc(username='781W22101984', password='204107')
     bbdc.login()
     print(bbdc.member_info)
     bbdc.tp_simulater_booking()
