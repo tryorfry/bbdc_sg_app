@@ -27,6 +27,7 @@ pyOpenSSL = "==21.0.0"
 fastapi = "*"
 gunicorn = "*"
 uvicorn = "*"
+bs4 = "*"
 
 [dev-packages]
 
